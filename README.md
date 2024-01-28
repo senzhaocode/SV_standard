@@ -50,6 +50,7 @@ The *example/DNA/input* folder contains raw SVs VCF files called from a range of
             |--- Lumpy.vcf
 
 **NOTE:** the raw VCF file (the compressed and indexed ones using bgzip and tabix are recommended) should be named using caller nomenclature.
+
 The *DNA_input* folder contains the results:
 
 ### 4. Run an example to aggregate SVs from RNA-seq data
