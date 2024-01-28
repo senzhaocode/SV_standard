@@ -36,7 +36,7 @@
     perl SV_standard.pl --genome hg38 --type DNA --filter PASS \
         --anno anno \
         --input example/DNA/input \
-        --output output
+        --output DNA_output
 
 The *example/DNA/input* folder contains raw SVs VCF files called from a range of tools per sample. Users have to prepare for their input files following the folder structure belew:
 
@@ -50,7 +50,14 @@ The *example/DNA/input* folder contains raw SVs VCF files called from a range of
             |--- Lumpy.vcf
 
 **NOTE:** the raw VCF file (the compressed and indexed ones using bgzip and tabix are recommended) should be named using caller nomenclature.
-    
+The *DNA_input* folder contains the results:
+
+### 4. Run an example to aggregate SVs from RNA-seq data
+
+    perl SV_standard.pl --genome hg38 --type RNA --filter PASS \
+        --anno anno \
+        --input example/RNA/input \
+        --output RNA_output
 
 
     
