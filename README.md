@@ -31,14 +31,14 @@
     
     **NOTE:** we recommend that users add the path of perl libraries to .bashrc, then `source .bashrc`
 
-### 3. Run an example to aggregate SVs from DNA-seq data
+### 3. Run an example to aggregate SVs called from DNA-seq data
 
     perl SV_standard.pl --genome hg38 --type DNA --filter PASS \
         --anno anno \
         --input example/DNA/input \
         --output DNA_output
 
-The *example/DNA/input* folder contains raw SVs VCF files called from a range of tools per sample. Users have to prepare for their input files following the folder structure belew:
+The *example/DNA/input* folder contains raw SVs VCF files called from one or several tools (e.g., *Manta*, *Svaba*, *Delly* and *Lumpy*) per sample. Users have to prepare for input files following the folder organization belew:
 
     example/DNA/input
         |--- T001 (sample name)
@@ -53,12 +53,24 @@ The *example/DNA/input* folder contains raw SVs VCF files called from a range of
 
 The *DNA_input* folder contains the results:
 
-### 4. Run an example to aggregate SVs from RNA-seq data
+### 4. Run an example to aggregate SVs called from RNA-seq data
 
-    perl SV_standard.pl --genome hg38 --type RNA --filter PASS \
+    perl SV_standard.pl --genome hg38 --type RNA \
         --anno anno \
         --input example/RNA/input \
         --output RNA_output
+
+The *example/RNA/input* folder contains raw SVs called from one or several tools (e.g., *Dragen*, *deFuse*, *STAR-fusion*, *Arriba* and *Fusioncatcher*) per sample. Users have to prepare for input files as the following organization below:
+
+     example/RNA/input
+        |--- T001 (sample name)
+            |--- Arriba.tsv
+            |--- STAR-fusion.tsv
+        |--- T002 (sample name)
+            |--- Dragen.txt
+            |--- Fusioncatcher.txt
+
+  **NOTE:** the raw input file should be a tab-separated format (TSV or TXT) file that is named using caller nomenclature.
 
 
     
