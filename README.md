@@ -49,7 +49,7 @@ The *example/DNA/input* folder contains raw SVs VCF files called from one or sev
                |--- T003 # sample name
                   |--- Lumpy.vcf
 
-**NOTE:** the raw VCF file (the compressed and indexed ones using bgzip and tabix are recommended) should be named using caller nomenclature.
+**NOTE:** the raw VCF file (the compressed and indexed ones using bgzip and tabix are recommended) should be named using caller nomenclature. In terms of raw SVs called from *Svaba*, no SV types (e.g., BND, INV, DEL and DUP) are available. Before running SV_standard.pl, we provide an in-house R script to assign SV type to each call and convert original vcf file following FuSViz requirement. See the usage, `Rscript script/svaba_svtype.R svaba_raw.vcf svaba_new.vcf`
 
 An example of *example/DNA/output* folder contains the results:
 
@@ -79,7 +79,7 @@ The *example/RNA/input* folder contains raw SVs called from one or several tools
 
   An example of *example/RNA/output* folder contains the results:
 
-   - `Final_RNA_SVs.txt` (a tab-separated format file with aggregated RNA-seq raw SV calls used for FuSViz input
+   - `Final_RNA_SVs.txt` (a tab-separated format file with aggregated RNA-seq raw SV calls used for FuSViz input)
 
 
 
