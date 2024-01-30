@@ -11,7 +11,7 @@ cols <- colnames(read.table(pipe(paste0('grep -v "##" ', args[1], ' | sed s/#//'
 #cols <- sapply(cols, function(x) gsub("(mrkdp\\.)|(\\.bam)", "", x))
 cols[10] <- unlist(strsplit(cols[10], '\\.'))[10]
 cols[11] <- unlist(strsplit(cols[11], '\\.'))[10]
-svaba_uniq <- read.table(pipe(paste0('grep -v "##" ', 'somatic_run.svaba.somatic.sv.vcf', ' | sed s/#//')), header=T, col.names = cols, stringsAsFactors = FALSE)
+svaba_uniq <- read.table(pipe(paste0('grep -v "##" ', args[1], ' | sed s/#//')), header=T, col.names = cols, stringsAsFactors = FALSE)
 
 for ( i in 1:length(svaba_uniq[,1]) ) {
     # Find mate pair
