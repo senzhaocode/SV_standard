@@ -36,22 +36,27 @@
     perl SV_standard.pl --genome hg38 --type DNA --filter PASS \
         --anno anno \
         --input example/DNA/input \
-        --output DNA_output
+        --output example/DNA/output
 
 The *example/DNA/input* folder contains raw SVs VCF files called from one or several tools (e.g., *Manta*, *Svaba*, *Delly* and *Lumpy*) per sample. Users have to prepare for input files following the folder organization belew:
 
     example/DNA/input
-        |--- T001 (sample name)
-            |--- Manta.vcf 
-            |--- Svaba.vcf
-        |--- T002 (sample name)
-            |--- Delly.vcf
-        |--- T003 (sample name)
-            |--- Lumpy.vcf
+               |--- T001 # sample name
+                  |--- Manta.vcf 
+                  |--- Svaba.vcf
+               |--- T002 # sample name
+                  |--- Delly.vcf
+               |--- T003 # sample name
+                  |--- Lumpy.vcf
 
 **NOTE:** the raw VCF file (the compressed and indexed ones using bgzip and tabix are recommended) should be named using caller nomenclature.
 
-The *DNA_input* folder contains the results:
+An example of *example/DNA/output* folder contains the results:
+
+ - `Final_DNA_SVs.txt` (a tab-separated format file with aggregated DNA-seq raw SV calls used for FuSViz input)
+ - `TXX_list` (an intermediate file lists callers used for raw SV calling)
+ - `TXX_merge.bedpe` (an intermediate bedpe file contains a merge of raw SVs from multiple callers)
+ - `TXX_merge.vcf` (an intermediate vcf file contains a merge of raw SVs from multiple callers)
 
 ### 4. Run an example to aggregate SVs called from RNA-seq data
 
@@ -63,14 +68,20 @@ The *DNA_input* folder contains the results:
 The *example/RNA/input* folder contains raw SVs called from one or several tools (e.g., *Dragen*, *deFuse*, *STAR-fusion*, *Arriba* and *Fusioncatcher*) per sample. Users have to prepare for input files as the following organization below:
 
      example/RNA/input
-        |--- T001 (sample name)
-            |--- Arriba.tsv
-            |--- STAR-fusion.tsv
-        |--- T002 (sample name)
-            |--- Dragen.txt
-            |--- Fusioncatcher.txt
+                |--- T001 # sample name
+                   |--- Arriba.tsv
+                   |--- STAR-fusion.tsv
+                |--- T002 # sample name
+                   |--- Dragen.txt
+                   |--- Fusioncatcher.txt
 
   **NOTE:** the raw input file should be a tab-separated format (TSV or TXT) file that is named using caller nomenclature.
+
+  An example of *example/RNA/output* folder contains the results:
+
+   - `Final_RNA_SVs.txt` (a tab-separated format file with aggregated RNA-seq raw SV calls used for FuSViz input
+
+
 
 
     
