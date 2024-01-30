@@ -7,11 +7,21 @@ if (length(args) != 2) {
 }
 
 # Read in svaba vcf file
-cols <- colnames(read.table(pipe(paste0('grep -v "##" ', args[1], ' | sed s/#//')), header=T))
+svaba_uniq <- NA
+cols <- NA
+if ( grepl("\\.gz$", args[1]) ) {
+	svaba_uniq <- read.table(pipe(paste0('zgrep -v "##" ', args[1], ' | sed s/#//')), header=T, col.names = cols, stringsAsFactors = FALSE)
+	cols <- colnames(read.table(pipe(paste0('zgrep -v "##" ', args[1], ' | sed s/#//')), header=T))
+} else if ( grepl("\\.vcf$", args[1]) ) {
+	svaba_uniq <- read.table(pipe(paste0('grep -v "##" ', args[1], ' | sed s/#//')), header=T, col.names = cols, stringsAsFactors = FALSE)
+	cols <- colnames(read.table(pipe(paste0('grep -v "##" ', args[1], ' | sed s/#//')), header=T))
+} else {
+	stop("raw SV calls from Svaba do not meet reqiurement!")
+}
+
 #cols <- sapply(cols, function(x) gsub("(mrkdp\\.)|(\\.bam)", "", x))
 cols[10] <- unlist(strsplit(cols[10], '\\.'))[10]
 cols[11] <- unlist(strsplit(cols[11], '\\.'))[10]
-svaba_uniq <- read.table(pipe(paste0('grep -v "##" ', args[1], ' | sed s/#//')), header=T, col.names = cols, stringsAsFactors = FALSE)
 
 for ( i in 1:length(svaba_uniq[,1]) ) {
     # Find mate pair
