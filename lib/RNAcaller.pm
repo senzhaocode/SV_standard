@@ -4,7 +4,7 @@ use warnings;
 
 	# // parse RNA SVs from Dragen caller
 	sub Dragen_support {
-		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna) = @_;
+		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna, $file) = @_;
 		my @all = split /\n/, $content;
 		for (my $i=0; $i < scalar(@all); $i++) {
 			my ($tmp1, $tmp2, $gene1, $gene2, $split, $discordant) = (split /\t/, $all[$i])[0, 1, 2, 3, 4, 5];
@@ -20,8 +20,8 @@ use warnings;
 			my ($chr1, $breakpoint1, $strand1) = (split /\:/, $tmp1)[0, 1, 2];
 			my ($chr2, $breakpoint2, $strand2) = (split /\:/, $tmp2)[0, 1, 2];
 			# print "Dragen: $strand1, $strand2, $breakpoint1, $breakpoint2, $split, $discordant, $gene1, $gene2\n";
-			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream");
-			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream");
+			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream", $file);
+			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream", $file);
 			
 			if ( $type1 =~/boundary|exon|intron/ and $type2 =~/boundary|exon|intron/ ) {
 				$gene1 = $gene1_new;	$gene2 = $gene2_new;
@@ -35,7 +35,7 @@ use warnings;
 
 	# // parse RNA SVs from Arriba caller
 	sub Arriba_support {
-		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna) = @_;
+		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna, $file) = @_;
 		my @all = split /\n/, $content;
 		for (my $i=0; $i < scalar(@all); $i++) {
 			my ($strand1, $strand2, $coordinate1, $coordinate2, $split1, $split2, $discordant, $gene1, $gene2) = (split /\t/, $all[$i])[0, 1, 2, 3, 4, 5, 6, 7, 8];
@@ -54,8 +54,8 @@ use warnings;
 			my ($chr1, $breakpoint1) = (split /\:/, $coordinate1)[0, 1];	$chr1 =~s/chr//g;	$chr1 = 'chr'.$chr1;
 			my ($chr2, $breakpoint2) = (split /\:/, $coordinate2)[0, 1];	$chr2 =~s/chr//g;	$chr2 = 'chr'.$chr2;
 			# print "Arriba: $strand1, $strand2, $coordinate1, $coordinate2, $split1, $split2, $discordant, $gene1, $gene2\n";
-			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream");
-			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream");
+			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream", $file);
+			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream", $file);
 
 			if ( $type1 =~/boundary|exon|intron/ and $type2 =~/boundary|exon|intron/ ) {
 				$gene1 = $gene1_new;    $gene2 = $gene2_new;
@@ -69,7 +69,7 @@ use warnings;
 
 	# // parse RNA SVs from STAR-fusion caller
 	sub STAR_fusion_support {
-		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna) = @_;
+		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna, $file) = @_;
 		my @all = split /\n/, $content;
 		for (my $i=0; $i < scalar(@all); $i++) {
 			my ($split, $discordant, $gene1, $tmp1, $gene2, $tmp2) = (split /\t/, $all[$i])[0, 1, 2, 3, 4, 5];
@@ -87,8 +87,8 @@ use warnings;
 			my ($chr1, $breakpoint1, $strand1) = (split /\:/, $tmp1)[0, 1, 2];	$chr1 =~s/chr//g;	$chr1 = 'chr'.$chr1;
 			my ($chr2, $breakpoint2, $strand2) = (split /\:/, $tmp2)[0, 1, 2];	$chr2 =~s/chr//g;	$chr2 = 'chr'.$chr2;
 			# print "STAR_fusion: $split, $discordant, $gene1, $tmp1, $gene2, $tmp2\n";
-			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream");
-			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream");
+			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream", $file);
+			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream", $file);
 
 			if ( $type1 =~/boundary|exon|intron/ and $type2 =~/boundary|exon|intron/ ) {
 				$gene1 = $gene1_new;    $gene2 = $gene2_new;
@@ -102,7 +102,7 @@ use warnings;
 
 	# // parse RNA SVs from Fusioncatcher caller
 	sub Fusioncatcher_support {
-		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna) = @_;
+		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna, $file) = @_;
 		my @all = split /\n/, $content;
 		for (my $i=0; $i < scalar(@all); $i++) {
 			my ($discordant, $split, $tmp1, $tmp2, $gene1, $gene2) = (split /\t/, $all[$i])[0, 1, 2, 3, 4, 5];
@@ -119,8 +119,8 @@ use warnings;
 			my ($chr1, $breakpoint1, $strand1) = (split /\:/, $tmp1)[0, 1, 2];	$chr1 =~s/chr//g;	$chr1 = 'chr'.$chr1;
 			my ($chr2, $breakpoint2, $strand2) = (split /\:/, $tmp2)[0, 1, 2];	$chr2 =~s/chr//g;	$chr2 = 'chr'.$chr2;
 			# print "Fusioncatcher: $discordant, $split, $tmp1, $tmp2, $gene1, $gene2\n";
-			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream");
-			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream");
+			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream", $file);
+			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream", $file);
 
 			if ( $type1 =~/boundary|exon|intron/ and $type2 =~/boundary|exon|intron/ ) {
 				$gene1 = $gene1_new;	$gene2 = $gene2_new;
@@ -134,7 +134,7 @@ use warnings;
 
 	# // arse RNA SVs from deFuse caller
 	sub deFuse_support {
-		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna) = @_;
+		my ($sample_name, $hash_ref, $content, $offset, $ref_gene_interval_rna, $ref_exon_interval_rna, $file) = @_;
                 my @all = split /\n/, $content;
                 for (my $i=0; $i < scalar(@all); $i++) {
                         my ($split, $split_span_p, $split_pos_p, $split_min_p, $homo, $gene1, $gene2, $chr1, $chr2, $breakpoint1, $breakpoint2, $strand1, $strand2, $span_mul, $span, $prob) = (split /\t/, $all[$i])[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
@@ -154,8 +154,8 @@ use warnings;
 			$chr1 =~s/chr//g;	$chr1 = 'chr'.$chr1;
 			$chr2 =~s/chr//g;	$chr2 = 'chr'.$chr2;
 			# print "deFuse: $split, $split_span_p, $split_pos_p, $split_min_p, $homo, $gene1, $gene2, $chr1, $chr2, $breakpoint1, $breakpoint2, $strand1, $strand2, $span_mul, $span\n";
-			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream");
-			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream");
+			my ($type1, $gene1_new, $break1_new) = &align_breakpoint($strand1, $chr1, $breakpoint1, $gene1, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "upstream", $file);
+			my ($type2, $gene2_new, $break2_new) = &align_breakpoint($strand2, $chr2, $breakpoint2, $gene2, $ref_gene_interval_rna, $ref_exon_interval_rna, $offset, "downstream", $file);
 
 			if ( $type1 =~/boundary|exon|intron/ and $type2 =~/boundary|exon|intron/ ) {
 				$gene1 = $gene1_new;	$gene2 = $gene2_new;
@@ -169,9 +169,10 @@ use warnings;
 
 	
 	sub align_breakpoint {
-		my ($s, $c, $bbb, $g, $gene_ref, $exon_ref, $offset, $comment) = @_;
+		my ($s, $c, $bbb, $g, $gene_ref, $exon_ref, $offset, $comment, $file) = @_;
 		my %b_pos_new; # - adjusted breakpoints and re-annotated partner genes
-		if ( $g =~/^ENSG/ ) { # ens_id available
+		open (LOG, ">>$file/log") || die "finally print log history error:$!\n";
+		if ( $g =~/^ENSG/ || $g =~/^ENSMUS/ ) { # ens_id available
 			if ( exists($exon_ref->{$g}) ) { # ens_id in caller output matches to that in annotation database
 				my $start_new = $exon_ref->{$g}[0][1] - $offset;
 				my $end_new = $exon_ref->{$g}[-1][2] + $offset;
@@ -181,21 +182,21 @@ use warnings;
 					if ( exists($gene_ref->{$c}) ) {
 						&collect_gene($bbb, $s, $gene_ref->{$c}, $exon_ref, \%b_pos_new, $comment, "NOT");
 					} else {
-						print "[RNAcaller class] given annotation has $g but breakpoint out of $g interval. Re-annotation does not work because chromosome $c not available in given annotation\n";
+						print LOG "[RNAcaller class] given annotation has $g but breakpoint out of $g interval. Re-annotation does not work because chromosome $c not available in given annotation\n";
 					}
 				}
 			} else { # if breakpoint has a gene_id which is not avaialable in our database -- need re-annotation
 				if ( exists($gene_ref->{$c}) ) {
 					&collect_gene($bbb, $s, $gene_ref->{$c}, $exon_ref, \%b_pos_new, $comment, "NOT");
 				} else {
-					print "[RNAcaller class] given annotation does not have $g. Re-annotation does not work because chromosome $c not available in given annotation\n";
+					print LOG "[RNAcaller class] given annotation does not have $g. Re-annotation does not work because chromosome $c not available in given annotation\n";
 				}
 			}
 		} else { # ens_id not available -- need re-annotation
 			if ( exists($gene_ref->{$c}) ) {
 				&collect_gene($bbb, $s, $gene_ref->{$c}, $exon_ref, \%b_pos_new, $comment, "NOT");
 			} else {
-				print "[RNAcaller class] breakpoint is annotated at intergenic region in fusion caller output. Re-annotation does not work because chromosome $c not available in given annotation\n";
+				print LOG "[RNAcaller class] breakpoint is annotated at intergenic region in fusion caller output. Re-annotation does not work because chromosome $c not available in given annotation\n";
 			}
 		}
 
@@ -203,37 +204,37 @@ use warnings;
 		# // prioritisation order: boundary -> exon -> intron -> intergenic
 		if ( %b_pos_new ) {
 			if ( exists($b_pos_new{'boundary'}) ) {
-				print "[RNAcaller class] boundary{$g-$bbb}: "; 
+				print LOG "[RNAcaller class] boundary{$g-$bbb}: "; 
 				foreach my $ens_id ( keys %{$b_pos_new{'boundary'}} ) { 
-					print "$ens_id=>";	$ens_return = $ens_id;
+					print LOG "$ens_id=>";	$ens_return = $ens_id;
 					foreach my $site ( reverse sort {$b_pos_new{'boundary'}{$ens_id}->{$a} <=> $b_pos_new{'boundary'}{$ens_id}->{$b}} keys %{$b_pos_new{'boundary'}{$ens_id}} ) {
-						print "($site - $b_pos_new{'boundary'}{$ens_id}{$site}) ";	$bbb_return = $site;
+						print LOG "($site - $b_pos_new{'boundary'}{$ens_id}{$site}) ";	$bbb_return = $site;
 					}
 				} 
-				print "\n";
+				print LOG "\n";
 				return("boundary", $ens_return, $bbb_return);
 			} else {
 				if ( exists($b_pos_new{'exon'}) ) {
-					print "[RNAcaller class] exon{$g-$bbb}: ";
+					print LOG "[RNAcaller class] exon{$g-$bbb}: ";
 					foreach my $ens_id ( keys %{$b_pos_new{'exon'}} ) { 
-						print "$ens_id=>";	$ens_return = $ens_id;
+						print LOG "$ens_id=>";	$ens_return = $ens_id;
 						foreach my $site ( sort {$b_pos_new{'exon'}{$ens_id}->{$a} <=> $b_pos_new{'exon'}{$ens_id}->{$b}} keys %{$b_pos_new{'exon'}{$ens_id}} ) {
-							print "($site - $b_pos_new{'exon'}{$ens_id}{$site}) ";	$bbb_return = $site;
+							print LOG "($site - $b_pos_new{'exon'}{$ens_id}{$site}) ";	$bbb_return = $site;
 						}
 					}
-					print "\n";
+					print LOG "\n";
 					return("exon", $ens_return, $bbb_return);
 				} else {
 					if ( exists($b_pos_new{'intron'}) ) {
-						print "[RNAcaller class] intron{$g-$bbb}: ";
+						print LOG "[RNAcaller class] intron{$g-$bbb}: ";
 						foreach my $ens_id ( keys %{$b_pos_new{'intron'}} ) { 
-							print "($ens_id=>undef) ";	$ens_return = $ens_id;
+							print LOG "($ens_id=>undef) ";	$ens_return = $ens_id;
 						}
-						print "\n";
+						print LOG "\n";
 						return("intron", $ens_return, undef);
 					} else {
 						if ( exists($b_pos_new{'intergenic'}) ) {
-							print "[RNAcaller class] intergenic{$g-$bbb}: \n";
+							print LOG "[RNAcaller class] intergenic{$g-$bbb}: \n";
 							return("intergenic", undef, undef);
 						} else {
 							die "Error: unexpeced annotation type for [$g-$bbb]\n";
@@ -244,6 +245,7 @@ use warnings;
 		} else {
 			return("unknown", undef, undef);
 		}
+		close LOG;
 	}
 
 	sub collect_gene { # get a set of genes harbor the given breakpoint

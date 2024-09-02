@@ -33,8 +33,12 @@ use warnings;
                 close RNA;
 
                 # load ensembl_id and gene symbol in a pair
-                open(INFO, "$path/ensembl_symbol_1_1.txt") || die strftime("%Y-%m-%d %H:%M:%S", localtime), " [Anno Class] - RNA: cannot open ensembl_id and gene_symbol in this $path:$!\n";
-                while ( <INFO> ) {
+		if ( $version eq 'hg19' || $version eq 'hg38' ) {
+                	open(INFO, "$path/human_ensembl_symbol_1_1.txt") || die strftime("%Y-%m-%d %H:%M:%S", localtime), " [Anno Class] - RNA: cannot open human ensembl_id and gene_symbol in this $path:$!\n";
+		} elsif ( $version eq 'GRCm39' ) {
+			open(INFO, "$path/mouse_ensembl_symbol_1_1.txt") || die strftime("%Y-%m-%d %H:%M:%S", localtime), " [Anno Class] - RNA: cannot open mouse ensembl_id and gene_symbol in this $path:$!\n";
+		}
+		while ( <INFO> ) {
                         chomp $_; next if ( $_ =~/Gene_ID/ );
                         my ($ens_id, $gene_symbol, $type) = (split /\t/, $_)[0, 1, 2];
                         $ens_ref->{$ens_id} = [$gene_symbol, $type];
@@ -50,7 +54,11 @@ use warnings;
 
 		# load ensembl_id and gene symbol in a pair
 		my %ens_hash; #
-		open(INFO, "$path/ensembl_symbol_1_1.txt") || die strftime("%Y-%m-%d %H:%M:%S", localtime), " [Anno Class] - DNA: cannot open ensembl_id and gene_symbol in this $path:$!\n";
+		if ( $version eq 'hg19' || $version eq 'hg38' ) {
+			open(INFO, "$path/human_ensembl_symbol_1_1.txt") || die strftime("%Y-%m-%d %H:%M:%S", localtime), " [Anno Class] - DNA: cannot open human ensembl_id and gene_symbol in this $path:$!\n";
+		} elsif ( $version eq 'GRCm39' ) {
+			open(INFO, "$path/mouse_ensembl_symbol_1_1.txt") || die strftime("%Y-%m-%d %H:%M:%S", localtime), " [Anno Class] - RNA: cannot open mouse ensembl_id and gene_symbol in this $path:$!\n";
+		}
 		while ( <INFO> ) {
 			chomp $_; next if ( $_ =~/Gene_ID/ );
 			my ($ens_id, $gene_symbol, $type) = (split /\t/, $_)[0, 1, 2];

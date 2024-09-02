@@ -301,8 +301,9 @@ use warnings;
 
 	#// assign gene annotation to the breakpoints
 	sub dna_break_anno {
-		my ($sample_name, $ref_single_break_dna, $ref_gene_interval_dna, $ref_collect_support_dna) = @_;
-
+		my ($sample_name, $ref_single_break_dna, $ref_gene_interval_dna, $ref_collect_support_dna, $file) = @_;
+		
+		open (LOG, ">>$file/log") || die "finally print log history error:$!\n";
 		foreach my $chr ( sort {$a cmp $b} keys %{$ref_single_break_dna} ) {
 			my $i = 0;
 			foreach my $start ( sort {$a <=> $b} keys %{$ref_single_break_dna->{$chr}} ) {
@@ -351,7 +352,7 @@ use warnings;
 							delete @ref_hash1{ grep { $ref_hash1{$_} =~/snoRNA|miRNA|lncRNA|pseudogene/ } keys %ref_hash1 };
 							my @array1 = keys %ref_hash1;
 							if ( scalar(@array1) == 0 ) {
-								print "[merge DNA SVs] - step.4: kept snoRNA-miRNA-lncRNA-pseudogene $sample_name, $chr, $start, $end, ", keys %{$ref_hash}, "\n";
+								print LOG "[merge DNA SVs] - step.4: kept snoRNA-miRNA-lncRNA-pseudogene $sample_name, $chr, $start, $end, ", keys %{$ref_hash}, "\n";
 							} else {
 								# remove 'orf' gene if other coding protein annotations are present
 								my %ref_hash2 = %ref_hash1;
@@ -401,6 +402,6 @@ use warnings;
 				}
 			}
 		}
-
+		close LOG;
 	}
 1;
