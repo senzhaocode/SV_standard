@@ -18,7 +18,7 @@ use DNAcaller;
 	push @usage, "Usage: ".basename($0)." [options]\n";
 	push @usage, "  --help\n";
 	push @usage, "  --type {DNA, RNA}		Set input SV calls from DNA-seq or RNA-seq\n";
-	push @usage, "  --genome {hg19, hg38}		Set genome version used for SV calls\n";
+	push @usage, "  --genome {hg19, hg38, GRCm39}	Set genome version used for SV calls\n";
 	push @usage, "  --filter {PASS, ALL}		Set an option for filtering raw SV calls before merging (default: PASS), only available for DNA SVs\n";
 	push @usage, "  --support {min, max, median}	Set a method to obtain split and spanning read support if SVs from multiple callers are available (default: median)\n";
 	push @usage, "  --offset			Set an offset value for extending a gene interval, e.g. [start-offset, end+offset], default:1000\n";
@@ -59,9 +59,12 @@ use DNAcaller;
 	if (! defined($offset) ) { $offset = 1000; }
 	if (! -e "$anno/gene_interval_hg19.bed.gz") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Gene interval annotation for hg19 not exists, quit!\n"; }
 	if (! -e "$anno/gene_interval_hg38.bed.gz") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Gene interval annotation for hg38 not exists, quit!\n"; }
+	if (! -e "$anno/gene_interval_GRCm39.bed.gz") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Gene interval annotation for GRCm39 not exists, quit!\n"; }
 	if (! -e "$anno/exon_interval_hg19.bed.gz") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Exon interval annotation for hg19 not exists, quit!\n"; }
 	if (! -e "$anno/exon_interval_hg38.bed.gz") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Exon interval annotation for hg38 not exists, quit!\n"; }
-	if (! -e "$anno/ensembl_symbol_1_1.txt") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Ensembl_id and Gene_symbol info not exists, quit!\n"; }
+	if (! -e "$anno/exon_interval_GRCm39.bed.gz") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Exon interval annotation for GRCm39 not exists, quit!\n"; }
+	if (! -e "$anno/human_ensembl_symbol_1_1.txt") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Human Ensembl_id and Gene_symbol info not exists, quit!\n"; }
+	if (! -e "$anno/mouse_ensembl_symbol_1_1.txt") { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] Mouse Ensembl_id and Gene_symbol info not exists, quit!\n"; }
 
 	if (! defined($filter) ) { $filter = "PASS"; } else {
 		if ( $filter eq 'PASS'  || $filter eq 'ALL' ) {} else { die strftime("%Y-%m-%d %H:%M:%S", localtime), " [option control] --filter MUST be 'PASS' or 'ALL'.\n"; } }
@@ -85,6 +88,8 @@ use DNAcaller;
 			Anno::process_gene_dna($anno, $genome, \%gene_interval_dna, $offset);
 		} elsif ( $genome eq 'hg38' ) {
 			Anno::process_gene_dna($anno, $genome, \%gene_interval_dna, $offset);
+		} elsif ( $genome eq 'GRCm39' ) {
+			Anno::process_gene_dna($anno, $genome, \%gene_interval_dna, $offset);
 		} else {
 			die strftime("%Y-%m-%d %H:%M:%S", localtime), " [load annotation] Genome version not correct for DNA SVs!\n";
 		}
@@ -92,6 +97,8 @@ use DNAcaller;
 		if ( $genome eq 'hg19' ) {
 			Anno::process_gene_rna($anno, $genome, \%gene_interval_rna, \%exon_interval_rna, \%ens_symbol_rna, $offset);
 		} elsif ( $genome eq 'hg38' ) {
+			Anno::process_gene_rna($anno, $genome, \%gene_interval_rna, \%exon_interval_rna, \%ens_symbol_rna, $offset);
+		} elsif ( $genome eq 'GRCm39' ) {
 			Anno::process_gene_rna($anno, $genome, \%gene_interval_rna, \%exon_interval_rna, \%ens_symbol_rna, $offset);
 		} else {
 			die strftime("%Y-%m-%d %H:%M:%S", localtime), " [load annotation] Genome version not correct for RNA SVs!\n";
@@ -119,23 +126,23 @@ use DNAcaller;
 					if ( $file =~/Arriba\.(tsv|txt)$/ ) {
 						my $text = `cat $file | cut -s -f3,4,5,6,10,11,12,21,22`; # select relevant columns of Arriba output
 						my %sss; $input_hash_rna{$sample}{'Arriba'} = \%sss; # define a reference to a hash structure
-						RNAcaller::Arriba_support($sample, $input_hash_rna{$sample}{'Arriba'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna);
+						RNAcaller::Arriba_support($sample, $input_hash_rna{$sample}{'Arriba'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna, $output);
 					} elsif ( $file =~/STAR\-fusion\.(tsv|txt)$/ ) {
 						my $text = `cat $file | cut -s -f2,3,7,8,9,10`; # select relevant columns of STAR-fusion output
 						my %sss; $input_hash_rna{$sample}{'STAR-fusion'} = \%sss; # define a reference to a hash structure
-						RNAcaller::STAR_fusion_support($sample, $input_hash_rna{$sample}{'STAR-fusion'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna);
+						RNAcaller::STAR_fusion_support($sample, $input_hash_rna{$sample}{'STAR-fusion'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna, $output);
 					} elsif ( $file =~/Fusioncatcher\.(tsv|txt)$/ ) {
 						my $text = `cat $file | cut -s -f5,6,9,10,11,12`; # select relevant columns of Fusioncatcher output
 						my %sss; $input_hash_rna{$sample}{'Fusioncatcher'} = \%sss; # define a reference to a hash structure
-						RNAcaller::Fusioncatcher_support($sample, $input_hash_rna{$sample}{'Fusioncatcher'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna);
+						RNAcaller::Fusioncatcher_support($sample, $input_hash_rna{$sample}{'Fusioncatcher'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna, $output);
 					} elsif ( $file =~/deFuse\.(tsv|txt)$/ ) {
 						my $text = `cat $file | cut -s -f3,4,5,6,12,21,22,25,26,38,39,40,41,51,57,65`; # select relevant columns of deFuse output
 						my %sss; $input_hash_rna{$sample}{'deFuse'} = \%sss; # define a reference to a hash structure
-						RNAcaller::deFuse_support($sample, $input_hash_rna{$sample}{'deFuse'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna);
+						RNAcaller::deFuse_support($sample, $input_hash_rna{$sample}{'deFuse'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna, $output);
 					} elsif ( $file =~/Dragen\.(tsv|txt)$/ ) {
 						my $text = `cat $file | cut -s -f3,4,9,10,11,13`; # select relevant columns of deFuse output
 						my %sss; $input_hash_rna{$sample}{'Dragen'} = \%sss; # define a reference to a hash structure
-						RNAcaller::Dragen_support($sample, $input_hash_rna{$sample}{'Dragen'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna);
+						RNAcaller::Dragen_support($sample, $input_hash_rna{$sample}{'Dragen'}, $text, $offset, \%gene_interval_rna, \%exon_interval_rna, $output);
 					} else {
 						print strftime("%Y-%m-%d %H:%M:%S", localtime), " [merge RNA SVs] - step.1: Unknown $file, the caller is not in acceptable list!\n";
 					}
@@ -177,7 +184,7 @@ use DNAcaller;
 
 		# // [merge RNA SVs] - step.2: final print merging results
 		open (OUT, ">$output/Final_RNA_SVs.txt") || die "final print merging results of RNA SVs:$!\n";
-		print OUT "chrom1\tpos1\tgene1\tchrom2\tpos2\tgene2\tname\tsplit\tspan\tstrand1\tstrand2\n";
+		print OUT "chrom1\tpos1\tgene1\tchrom2\tpos2\tgene2\tname\tsplit\tspan\tstrand1\tstrand2\tuntemplated_insert\n";
 		foreach my $sample ( keys %input_hash_rna ) {
 			foreach my $geneA ( keys %{$input_hash_rna{$sample}{'merge'}} ) {
 				foreach my $geneB ( keys %{$input_hash_rna{$sample}{'merge'}{$geneA}} ) {
@@ -211,18 +218,18 @@ use DNAcaller;
 							my $symbolB; if ( exists($ens_symbol_rna{$geneB}) ) { if ( $ens_symbol_rna{$geneB}[0] eq '' ) { $symbolB = $geneB; } else { $symbolB = $ens_symbol_rna{$geneB}[0]; } } else { $symbolB = $geneB; }
 							if ( exists($count_hash_rna{$geneB}{$geneA}) ) {
 								if ( $count_hash_rna{$geneA}{$geneB} > $count_hash_rna{$geneB}{$geneA} ) { # geneA-geneB is more frequent than geneB-geneA
-									print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\n";
+									print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\n";
 								} elsif ( $count_hash_rna{$geneA}{$geneB} < $count_hash_rna{$geneB}{$geneA} ) { # geneB-geneA is more frequent than geneA-geneB
-									print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\n";
+									print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\t\n";
 								} else {
 									if ( $geneA lt $geneB ) {
-										print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\n";
+										print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\n";
 									} else {
-										print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\n";
+										print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\t\n";
 									}
 								}
 							} else {
-								print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\n";
+								print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\n";
 							}
 						}
 					}
@@ -436,7 +443,7 @@ use DNAcaller;
 			}
 
 			# // [merge DNA SVs] - step.4: assign gene annotation to breakpoints
-			DNAcaller::dna_break_anno($sample, \%single_break_dna, \%gene_interval_dna, \%collect_support_dna);
+			DNAcaller::dna_break_anno($sample, \%single_break_dna, \%gene_interval_dna, \%collect_support_dna, $output);
 
 		}
 
@@ -469,14 +476,14 @@ use DNAcaller;
 					my $gene1;	my $gene2;
 					if ( defined($collect_support_dna{$sample}{$id}{'bedpe'}[7]) ) { 
 						foreach my $gene_tmp ( @{$collect_support_dna{$sample}{$id}{'bedpe'}[7]} ) {
-							if ( $gene_tmp =~/^ENSG/ ) { $gene1 = $gene_tmp; } else { $gene1 = $gene_tmp; last; }
+							if ( $gene_tmp =~/^ENSG/ || $gene_tmp =~/^ENSMUS/ ) { $gene1 = $gene_tmp; } else { $gene1 = $gene_tmp; last; }
 						}
 					} else { 
 						$gene1 = "*"; 
 					}
 					if ( defined($collect_support_dna{$sample}{$id}{'bedpe'}[8]) ) {
 						foreach my $gene_tmp ( @{$collect_support_dna{$sample}{$id}{'bedpe'}[8]} ) {
-							if ( $gene_tmp =~/^ENSG/ ) { $gene2 = $gene_tmp; } else { $gene2 = $gene_tmp; last; }
+							if ( $gene_tmp =~/^ENSG/ || $gene_tmp =~/^ENSMUS/ ) { $gene2 = $gene_tmp; } else { $gene2 = $gene_tmp; last; }
 						}
 					} else {
 						$gene2 = "*";
