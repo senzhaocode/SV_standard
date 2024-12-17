@@ -184,7 +184,7 @@ use DNAcaller;
 
 		# // [merge RNA SVs] - step.2: final print merging results
 		open (OUT, ">$output/Final_RNA_SVs.txt") || die "final print merging results of RNA SVs:$!\n";
-		print OUT "chrom1\tpos1\tgene1\tchrom2\tpos2\tgene2\tname\tsplit\tspan\tstrand1\tstrand2\tuntemplated_insert\n";
+		print OUT "chrom1\tpos1\tgene1\tchrom2\tpos2\tgene2\tname\tsplit\tspan\tstrand1\tstrand2\tuntemplated_insert\tcomment\n";
 		foreach my $sample ( keys %input_hash_rna ) {
 			foreach my $geneA ( keys %{$input_hash_rna{$sample}{'merge'}} ) {
 				foreach my $geneB ( keys %{$input_hash_rna{$sample}{'merge'}{$geneA}} ) {
@@ -218,18 +218,18 @@ use DNAcaller;
 							my $symbolB; if ( exists($ens_symbol_rna{$geneB}) ) { if ( $ens_symbol_rna{$geneB}[0] eq '' ) { $symbolB = $geneB; } else { $symbolB = $ens_symbol_rna{$geneB}[0]; } } else { $symbolB = $geneB; }
 							if ( exists($count_hash_rna{$geneB}{$geneA}) ) {
 								if ( $count_hash_rna{$geneA}{$geneB} > $count_hash_rna{$geneB}{$geneA} ) { # geneA-geneB is more frequent than geneB-geneA
-									print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\n";
+									print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\t\n";
 								} elsif ( $count_hash_rna{$geneA}{$geneB} < $count_hash_rna{$geneB}{$geneA} ) { # geneB-geneA is more frequent than geneA-geneB
-									print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\t\n";
+									print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\t\t\n";
 								} else {
 									if ( $geneA lt $geneB ) {
-										print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\n";
+										print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\t\n";
 									} else {
-										print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\t\n";
+										print OUT "$chrB\t$breakpoint2\t$symbolB\t$chrA\t$breakpoint1\t$symbolA\t$sample\t$split_value\t$span_value\t$strandB\t$strandA\t\t\n";
 									}
 								}
 							} else {
-								print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\n";
+								print OUT "$chrA\t$breakpoint1\t$symbolA\t$chrB\t$breakpoint2\t$symbolB\t$sample\t$split_value\t$span_value\t$strandA\t$strandB\t\t\n";
 							}
 						}
 					}
@@ -449,7 +449,7 @@ use DNAcaller;
 
 		# // [merge DNA SVs] - step.5: final print merging results
 		open (OUT, ">$output/Final_DNA_SVs.txt") || die "final print merging results of DNA SVs:$!\n";
-		print OUT "chrom1\tstart1\tend1\tchrom2\tstart2\tend2\tname\ttype\tsplit\tspan\tgene1\tgene2\n";
+		print OUT "chrom1\tstart1\tend1\tchrom2\tstart2\tend2\tname\ttype\tsplit\tspan\tgene1\tgene2\tcomment\n";
 		foreach my $sample (keys %collect_support_dna ) {
 			foreach my $id ( keys %{$collect_support_dna{$sample}} ) {
 				if ( defined($collect_support_dna{$sample}{$id}{'bedpe'}) ) {
@@ -490,7 +490,7 @@ use DNAcaller;
 					}
 
 					if ( $chr1 ne $chr2 ) { # inter-chromosome events
-						print OUT "$chr1\t$start1\t$end1\t$chr2\t$start2\t$end2\t$sample\tBND\t$split_value\t$span_value\t$gene1\t$gene2\n";
+						print OUT "$chr1\t$start1\t$end1\t$chr2\t$start2\t$end2\t$sample\tBND\t$split_value\t$span_value\t$gene1\t$gene2\t\n";
 #						print "type:[@{$collect_support_dna{$sample}{$id}{'type'}}]\t";
 					} else { # intra-chromosome events -- abount INS insertion????????
 						my $type_assign;
@@ -503,7 +503,7 @@ use DNAcaller;
 						}
 						
 						if ( defined($type_assign) ) { 	
-							print OUT "$chr1\t$start1\t$end1\t$chr2\t$start2\t$end2\t$sample\t$type_assign\t$split_value\t$span_value\t$gene1\t$gene2\n";
+							print OUT "$chr1\t$start1\t$end1\t$chr2\t$start2\t$end2\t$sample\t$type_assign\t$split_value\t$span_value\t$gene1\t$gene2\t\n";
 #							print "type:[@{$collect_support_dna{$sample}{$id}{'type'}}]\t";
 						}
 					}
